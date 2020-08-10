@@ -1,0 +1,36 @@
+Push new code to repo
+Run tests
+Build Image
+Publish Image
+Deploy staged
+Run more tests
+Deploy production
+
+-- on error, notify email/slack
+
+https://cloud.google.com/solutions/continuous-delivery-jenkins-kubernetes-engine
+https://www.magalix.com/blog/create-a-ci/cd-pipeline-with-kubernetes-and-jenkins
+
+
+# Local Jenkins
+docker network create jenkins
+
+docker container run --name jenkins-docker --rm --detach \
+  --privileged --network jenkins --network-alias docker \
+  --env DOCKER_TLS_CERTDIR=/certs \
+  --volume jenkins-docker-certs:/certs/client \
+  --volume jenkins-data:/var/jenkins_home \
+  --publish 2376:2376 docker:dind
+  
+docker container run --name jenkins-blueocean --rm --detach \
+  --network jenkins --env DOCKER_HOST=tcp://docker:2376 \
+  --env DOCKER_CERT_PATH=/certs/client --env DOCKER_TLS_VERIFY=1 \
+  --volume jenkins-data:/var/jenkins_home \
+  --volume jenkins-docker-certs:/certs/client:ro \
+  --publish 8080:8080 --publish 50000:50000 jenkinsci/blueocean
+
+# Publish Jenkins port to receive commit hooks
+~/Downloads/ngrok authtoken 1flQgNs4lLY7NAMP1AOqfRAkTGt_vfnrj1ew7DhpsrniYhUe
+~/Downloads/ngrok http 8080
+
+

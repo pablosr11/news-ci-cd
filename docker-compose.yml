@@ -1,0 +1,22 @@
+version: "3"
+services:
+  jenkins:
+    image: 4oh4/jenkins-docker #jenkinsci/blueocean
+    user: root
+    privileged: true
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+      - "50000:50000"
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+
+
+volumes: 
+  jenkins-data:
