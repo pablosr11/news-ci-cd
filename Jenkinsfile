@@ -1,7 +1,8 @@
 pipeline {
     environment {
-        registry = 'pablosr11/newscicd'
+        REGISTRY = 'pablosr11/newscicd'
         creds = 'dockerhub'
+        TAG = 'latest'
     }
     agent any
     stages {
@@ -22,15 +23,15 @@ pipeline {
                 }
             }
         }
-        // stage('Run test') {
-        //     steps {
-        //         script {
-        //             customImage.inside {
-        //                 sh 'python -m pytest app/tests/'
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Run test') {
+            steps {
+                script {
+                    docker.image("${REGISTRY}:${TAG}").inside {
+                        sh 'python -m pytest app/tests/'
+                    }
+                }
+            }
+        }
         stage('Run Linter') {
             steps {
                 echo 'Pylint for the win'
