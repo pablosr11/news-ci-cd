@@ -1,25 +1,41 @@
 pipeline {
     environment {
         REGISTRY = 'pablosr11/newscicd'
-        creds = 'dockerhub'
-        TAG = 'latest'
+        TAG = '0.0.1'
     }
     agent any
     stages {
         stage('Build docker image') {
             steps {
                 script {
-                    Object customImage = docker.build('pablosr11/newscicd:latest')
-
-                    customImage.inside {
-                        sh 'python -m pytest app/tests/'
+                    docker.build("${REGISTRY}:${TAG}")
+                }
+            }
+        }
+        stage('Language specific security checks') {
+            steps {
+                script {
+                    docker.image("${REGISTRY}:${TAG}").inside {
+                        sh 'echo PYTHON SECURITY CHECKS'
                     }
-
-                    withCredentials([string(credentialsId: 'Dockerhub-user', variable: 'USER'), string(credentialsId: 'Dockerhub-pass', variable: 'PASS')]) {
-                        sh "echo $PASS | docker login --username $USER --password-stdin"
+                }
+            }
+        }
+        stage('Container security checks') {
+            steps {
+                script {
+                    docker.image("${REGISTRY}:${TAG}").inside {
+                        sh 'echo CONTAINER WIDE CHECKS'
                     }
-
-                    customImage.push()
+                }
+            }
+        }
+        stage('Run Linter') {
+            steps {
+                script {
+                    docker.image("${REGISTRY}:${TAG}").inside {
+                        sh 'python -m pylint app/'
+                    }
                 }
             }
         }
@@ -31,28 +47,28 @@ pipeline {
                     }
                 }
             }
-        }
-        stage('Run Linter') {
-            steps {
-                echo 'Pylint for the win'
-            }
-        }
-        stage('Security checks and other static analysis') {
-            steps {
-                echo 'Security checks'
-            }
-        }
-        stage('Run Unittests') {
-            agent {
-                docker { image 'python:3.8-buster' }
-            }
-            steps {
-                sh '. venv/bin/activate && python -m pytest app/tests/'
-            }
             post {
                 failure {
                     echo 'Failing tests, senf notification'
                 }
+            }
+        }
+        stage('Push Image') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'Dockerhub-user', variable: 'USER'), string(credentialsId: 'Dockerhub-pass', variable: 'PASS')]) {
+                        sh "echo $PASS | docker login --username $USER --password-stdin"
+                    }
+                    docker.image("${REGISTRY}:${TAG}").push()
+                }
+            }
+        }
+        stage('Build helm charts with new version etc') {
+            agent {
+                docker { image 'alpine/helm:2.16.9' }
+            }
+            steps {
+                sh 'helm lint k8s/'
             }
         }
         stage('Run Functional-tests') {
@@ -60,18 +76,17 @@ pipeline {
                 echo 'Integration tests go here'
             }
         }
+        stage('Stage Deployment') {
+            steps {
+                echo 'K8s deployment yiiiiija'
+            }
+        }
         stage('Run E2E-tests') {
             steps {
                 echo 'E2E tests go here'
             }
         }
-
-        stage('Push to docker hub') {
-            steps {
-                echo 'Pushing to dockerhub'
-            }
-        }
-        stage('Stage Deployment') {
+        stage('Production Deployment') {
             steps {
                 echo 'K8s deployment yiiiiija'
             }
@@ -79,8 +94,7 @@ pipeline {
     }
     post {
         always {
-            echo 'Remove env'
-            sh 'rm -rf venv'
+            echo 'Always runs'
         }
         success {
             echo 'This will run only if successful'

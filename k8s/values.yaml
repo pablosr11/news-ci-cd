@@ -7,8 +7,9 @@ replicaCount: 1
 image:
   repository: docker.io/pablosr11/newscicd
   pullPolicy: IfNotPresent
+  
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  # tag: "0.0.1"
 
 imagePullSecrets: []
 nameOverride: ""

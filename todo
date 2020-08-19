@@ -1,18 +1,25 @@
 Push new code to repo X
   - keep track of tag all the way from here
-Static code analysis Python
-  - security (packages)
-  - linting, quality
 Build Image X
+  - build image for testing and for production. only diff is loading/not loading the test dir and the requiremenets.txt
+Container static security checks  
   - security check, scan images
+Static code analysis Python -> ensure all checks are done on the correct image
+  - security (packages)
+    - cat requirements.txt | docker run -i --rm pyupio/safety safety check --stdin
+    - bandit
+  - linting, quality over N% (pylint 9.5?) X
 Run unit tests X 
   - separate unit test from image building
-Publish Image X
+  - test coverage over X%
+Run functional tests
+  - integrate with mock DB, mock queue etc
+Publish Image X -> ensure correct image is pushed
   - secure password (docker warning)
+-------------------------------EXIT here if any checks fail
 Build kubernetes charts, helm charts etc !!!
   - helm lint and helm package
-Deploy staged (docker or K8s)
-Run functional tests?
+Deploy staged (K8s)
 Run acceptance tests/E2E tests
 Deploy production (docker or K8s)
 
