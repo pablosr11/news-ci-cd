@@ -1,15 +1,36 @@
-Push new code to repo
-Run tests
-Build Image
-Publish Image
-Deploy staged
-Run more tests
-Deploy production
+Push new code to repo X
+  - keep track of tag all the way from here
+Static code analysis Python
+  - security (packages)
+  - linting, quality
+Build Image X
+  - security check, scan images
+Run unit tests X 
+  - separate unit test from image building
+Publish Image X
+  - secure password (docker warning)
+Build kubernetes charts, helm charts etc !!!
+  - helm lint and helm package
+Deploy staged (docker or K8s)
+Run functional tests?
+Run acceptance tests/E2E tests
+Deploy production (docker or K8s)
 
 -- on error, notify email/slack
+-- some monitorisation datacollector -> prometheus/influxdb -> graphana
 
 https://cloud.google.com/solutions/continuous-delivery-jenkins-kubernetes-engine
 https://www.magalix.com/blog/create-a-ci/cd-pipeline-with-kubernetes-and-jenkins
+
+
+## helm
+helm package newscicd
+helm install news newscicd-0.0.1.tgz
+helm upgrade news newscicd-0.0.1.tgz
+helm uninstall news
+helm list
+helm lint
+
 
 
 # Local Jenkins
